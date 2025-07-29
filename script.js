@@ -1,27 +1,24 @@
 async function sendMessage() {
   const input = document.getElementById('input');
-  const message = input.value;
-  if (!message) return;
+  const chat = document.getElementById('chat');
+  const userMessage = input.value;
+  
+  if (!userMessage) return;
 
-  addMessage(`USER: ${message}`, "blue");
-
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
-  });
-
-  const data = await res.json();
-  addMessage(`BOT: ${data.reply || data.error}`, "green");
-
+  chat.innerHTML += `<div style="color:blue">USER: ${userMessage}</div>`;
   input.value = '';
-}
 
-function addMessage(text, color) {
-  const chatBox = document.getElementById('chat');
-  const div = document.createElement('div');
-  div.style.color = color;
-  div.textContent = text;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMessage })
+    });
+
+    const data = await res.json();
+    chat.innerHTML += `<div style="color:green">BOT: ${data.reply}</div>`;
+    chat.scrollTop = chat.scrollHeight;
+  } catch (err) {
+    chat.innerHTML += `<div style="color:red">BOT: Fehler bei der KI</div>`;
+  }
 }
